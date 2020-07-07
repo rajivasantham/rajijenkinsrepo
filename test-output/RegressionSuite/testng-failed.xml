@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite guice-stage="DEVELOPMENT" name="Failed suite [RegressionSuite]">
+  <test thread-count="5" name="RegressionTest(failed)">
+    <parameter name="browser" value="chromeBrowser"/>
+    <classes>
+      <class name="com.project.Ecommerce.RadioButton1">
+        <methods>
+          <include name="beforeMethod"/>
+          <include name="radioTest"/>
+          <include name="afterMethod"/>
+        </methods>
+      </class> <!-- com.project.Ecommerce.RadioButton1 -->
+      <class name="com.project.Ecommerce.CheckBox1">
+        <methods>
+          <include name="afterMethod"/>
+          <include name="checkboxTest"/>
+          <include name="beforeMethod"/>
+        </methods>
+      </class> <!-- com.project.Ecommerce.CheckBox1 -->
+      <class name="com.project.Ecommerce.TC_002">
+        <methods>
+          <include name="amazon"/>
+          <include name="endProcess"/>
+          <include name="startProcess"/>
+        </methods>
+      </class> <!-- com.project.Ecommerce.TC_002 -->
+      <class name="com.project.Ecommerce.LinksTesting">
+        <methods>
+          <include name="afterMethod"/>
+          <include name="beforeMethod"/>
+          <include name="f"/>
+        </methods>
+      </class> <!-- com.project.Ecommerce.LinksTesting -->
+    </classes>
+  </test> <!-- RegressionTest(failed) -->
+</suite> <!-- Failed suite [RegressionSuite] -->

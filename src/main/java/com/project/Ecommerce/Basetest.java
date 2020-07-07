@@ -1,0 +1,205 @@
+   package com.project.Ecommerce;
+
+
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Date;
+import java.util.Properties;
+import java.util.Random;
+
+import org.apache.log4j.PropertyConfigurator;
+import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeDriverService;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.firefox.ProfilesIni;
+import org.openqa.selenium.io.FileHandler;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import com.relevantcodes.extentreports.ExtentReports;
+import com.relevantcodes.extentreports.ExtentTest;
+import com.relevantcodes.extentreports.LogStatus;
+
+public class Basetest {
+public static WebDriver driver;
+public static String projectpath=System.getProperty("user.dir");
+public static Properties p;
+public static Properties mainprop;
+public static Properties subprop;
+public static Properties prop;
+public static FileInputStream fis;
+public static ExtentReports report;
+public static ExtentTest test;
+public static String filepath;
+
+static {
+	Date dt=new Date();
+	filepath=dt.toString().replace(' ', '_').replace(':', '_');
+}
+
+
+public static void init() throws Exception {
+
+	 fis=new FileInputStream(projectpath+"//data.properties");
+	 p=new Properties();
+	 p.load(fis);
+	 
+	 
+	 fis=new FileInputStream(projectpath+"//environment.properties");
+	 mainprop=new Properties();
+	 mainprop.load(fis);
+	 String e=mainprop.getProperty("env");
+	 System.out.println(e);
+	 
+	 fis=new FileInputStream(projectpath+"//"+e+".properties");
+	 subprop=new Properties();
+	 subprop.load(fis);
+	 String url=subprop.getProperty("amazonurl");
+	 System.out.println(url);
+	 
+	 fis=new FileInputStream(projectpath+"//log4jconfig.properties");
+	 PropertyConfigurator.configure(fis);
+     
+	 report=ExtentManager.getInstance();
+}
+
+	public static void openBrowser(String browser) {
+		if(browser.equals("chrome")) {
+			
+		    
+			System.setProperty("webdriver.chrome.driver","D:\\Drivers\\chromedriver_win32\\chromedriver.exe");
+			//driver =new ChromeDriver();
+			System.setProperty(ChromeDriverService.CHROME_DRIVER_LOG_PROPERTY,"false");
+			ChromeOptions option=new ChromeOptions();
+			option.addArguments("user-data-dir=C:\\Users\\VENUG\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 3");
+		    option.addArguments("--disable-notifications");
+			driver =new ChromeDriver(option);
+			
+		}else if(browser.equals("firefox")) {
+			System.setProperty("webdriver.gecko.driver","D:\\Drivers\\geckodriver-v0.26.0-win64\\geckodriver.exe");
+			//driver =new FirefoxDriver();
+			ProfilesIni p=new ProfilesIni();
+            FirefoxProfile profile=p.getProfile("MarchFFProfile");
+			profile.setPreference("dom.webnotifications.enabled", false);
+			 
+            FirefoxOptions option=new FirefoxOptions();
+            option.setProfile(profile);
+			driver=new FirefoxDriver(option);
+		}
+		driver.manage().window().maximize();
+
+	}
+	public static void navigateUrl(String url) {
+		//driver.get(p.getProperty(url));
+		driver.get(subprop.getProperty(url));
+		//driver.navigate().to(subprop.getProperty(url));
+	
+	} 
+
+	public static void clickElement(String locatorKey) 
+	{
+		//driver.findElement(By.xpath(locatorKey)).click();
+		getElement(locatorKey).click();
+	}
+
+	public static void type(String locatorKey, String value)
+	{
+		//driver.findElement(By.name(locatorKey)).sendKeys(value);
+		getElement(locatorKey).sendKeys(mainprop.getProperty(value));
+	}
+
+	public static void selectOption(String locatorKey, String item) 
+	{
+		//driver.findElement(By.id(locatorKey)).sendKeys(item);
+		getElement(locatorKey).sendKeys(mainprop.getProperty(item));
+	}
+
+
+	private static WebElement getElement(String locatorKey) 
+	{
+		WebElement element=null;
+
+		if(locatorKey.endsWith("_id")) {
+			element=driver.findElement(By.id(mainprop.getProperty(locatorKey)));
+		}else if(locatorKey.endsWith("_name")) {
+			element=driver.findElement(By.name(mainprop.getProperty(locatorKey)));
+		}else if(locatorKey.endsWith("_classname")) {
+			element=driver.findElement(By.className(mainprop.getProperty(locatorKey)));
+		}else if(locatorKey.endsWith("_xpath")) {
+			element=driver.findElement(By.xpath(mainprop.getProperty(locatorKey)));
+		}else if(locatorKey.endsWith("_css")) {
+			element=driver.findElement(By.cssSelector(mainprop.getProperty(locatorKey)));
+		}else if(locatorKey.endsWith("_linktext")) {
+			element=driver.findElement(By.linkText(mainprop.getProperty(locatorKey)));
+		}else if(locatorKey.endsWith("_partiallinktext")) {
+			element=driver.findElement(By.partialLinkText(mainprop.getProperty(locatorKey)));
+		}
+		return element;
+	}
+		
+		public static boolean isElementEqual(String expectedLink) {
+			String actualLink=driver.findElement(By.linkText("Customer Service")).getAttribute("innerHTML");
+			
+			if(actualLink.equals(expectedLink)) 
+				return true;	
+			else
+				return false;
+			
+		}
+		//************************Reportings********************//
+		
+
+		public static void reportSuccess(String Passstatus) {
+		test.log(LogStatus.PASS, Passstatus);
+			
+		}
+
+		public static void reportFailure(String FailStatus) throws Exception {
+		test.log(LogStatus.FAIL, FailStatus);
+		takesScreenShot();
+		
+			
+		}
+
+		private static void takesScreenShot() throws Exception{
+			Date dt=new Date();
+			System.out.println(dt);
+			String dateFormat=dt.toString().replace(":","_").replace(" ","_")+".png";
+			File scrFile=((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+			FileHandler.copy(scrFile,new File(projectpath+"\\Screenshots\\"+dateFormat));
+            
+			test.log(LogStatus.INFO,"Screenshot-----"+test.addScreenCapture(projectpath+"\\Screenshots\\"+dateFormat));
+			
+		}
+		public void waitforElement(int timeInSeconds,WebElement element) {
+			WebDriverWait wait= new WebDriverWait(driver,timeInSeconds);
+			wait.until(ExpectedConditions.visibilityOf(element));
+			
+		}
+		public int randomNum() {
+			Random r=new Random();
+		    int	rnum=r.nextInt(99999);
+			return rnum;
+			
+		}
+	}
+
+
+	
+	
+
+	
+	
+
+
+ 
+
